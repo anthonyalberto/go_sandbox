@@ -88,3 +88,25 @@ Concurrency
 - There is therefore no guarantee that a send + receive will happen
 
 - For both types, reading from a channel consumes the message. It's not multicast.
+
+- When declaring a struct :
+  ```go
+    type Runner struct {
+      interrupt chan os.Signal // interrupt can be used to receive and send
+      timeout <-chan time.Time // timeout can only be used to receive
+    }
+  ```
+
+- Within a select, a blocking read on channel can become non blocking by adding a `default` close :
+  ```go
+    select {
+    case <- channel:
+      signal.Stop(channel) // Illustrates how to stop receiving from this channel going forward
+      // Do stuff
+    default:
+      // Was unable to read from channel, carry on
+    }
+  ```
+
+- Buffered channels are a good way to implement connection / resource pooling
+- Favor unbuffered channels when we want guarantees that the exchange between sender and receiver will take place
